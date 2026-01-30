@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Hardhat artifacts
+cache/
+artifacts/
+typechain-types/
+
+# Environment (NEVER commit)
+.env
+
+# Coverage
+coverage/
+coverage.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

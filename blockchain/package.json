@@ -1,0 +1,20 @@
+{
+    "name": "proofx-contracts",
+    "version": "1.0.0",
+    "description": "ProofX Protocol - Smart Contracts",
+    "scripts": {
+        "compile": "hardhat compile",
+        "test": "hardhat test",
+        "deploy:local": "hardhat run scripts/deploy.ts",
+        "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia",
+        "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy",
+        "verify": "hardhat verify",
+        "clean": "hardhat clean",
+        "console": "hardhat console"
+    },
+    "devDependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+        "dotenv": "^16.4.7",
+        "hardhat": "^2.22.0"
+    }
+}
