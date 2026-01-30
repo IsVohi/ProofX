@@ -1,0 +1,18 @@
+{
+    "name": "proofx-circuits",
+    "version": "1.0.0",
+    "description": "ProofX Protocol - ZK Circuits",
+    "scripts": {
+        "compile": "circom compliance.circom --r1cs --wasm --sym -o build",
+        "setup": "snarkjs groth16 setup build/compliance.r1cs pot12_final.ptau circuit_0000.zkey",
+        "contribute": "snarkjs zkey contribute circuit_0000.zkey circuit_final.zkey --name=\"ProofX Contributor\"",
+        "export:vkey": "snarkjs zkey export verificationkey circuit_final.zkey verification_key.json",
+        "export:solidity": "snarkjs zkey export solidityverifier circuit_final.zkey ../blockchain/contracts/Groth16Verifier.sol",
+        "prove": "snarkjs groth16 prove circuit_final.zkey witness.wtns proof.json public.json",
+        "verify": "snarkjs groth16 verify verification_key.json public.json proof.json"
+    },
+    "dependencies": {
+        "circomlib": "^2.0.5",
+        "snarkjs": "^0.7.4"
+    }
+}

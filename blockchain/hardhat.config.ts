@@ -26,8 +26,10 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
+import * as path from "path";
 
-dotenv.config();
+// Read from root .env file
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 // Validate required env vars
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
@@ -71,20 +73,22 @@ const config: HardhatUserConfig = {
 
     // Contract verification
     etherscan: {
-        apiKey: {
-            sepolia: ETHERSCAN_API_KEY,
-            polygonAmoy: POLYGONSCAN_API_KEY,
-        },
-        customChains: [
-            {
-                network: "polygonAmoy",
-                chainId: 80002,
-                urls: {
-                    apiURL: "https://api-amoy.polygonscan.com/api",
-                    browserURL: "https://amoy.polygonscan.com",
-                },
-            },
-        ],
+        // Etherscan V2 requires a single API key string
+        apiKey: ETHERSCAN_API_KEY,
+        // apiKey: {
+        //     sepolia: ETHERSCAN_API_KEY,
+        //     polygonAmoy: POLYGONSCAN_API_KEY,
+        // },
+        // customChains: [
+        //     {
+        //         network: "polygonAmoy",
+        //         chainId: 80002,
+        //         urls: {
+        //             apiURL: "https://api-amoy.polygonscan.com/api",
+        //             browserURL: "https://amoy.polygonscan.com",
+        //         },
+        //     },
+        // ],
     },
 
     // Gas reporting for optimization

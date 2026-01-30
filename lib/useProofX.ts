@@ -2,82 +2,110 @@
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * ProofX Protocol - useProofX Hook
+ * ProofX Protocol — useProofX Hook with Real ZK Proof Submission
  * ═══════════════════════════════════════════════════════════════════════════
  * 
- * Orchestrates the complete end-to-end proof verification flow:
- * 
  * FLOW:
- * ┌─────────────────────────────────────────────────────────────────────────┐
- * │ 1. Frontend calls generateAndSubmitProof(input)                        │
- * │ 2. Hook calls Backend Prover → receives commitment hash                │
- * │ 3. Hook calls contract.verifyProof(commitment) via MetaMask            │
- * │ 4. User signs transaction in MetaMask                                  │
- * │ 5. Hook waits for transaction confirmation                             │
- * │ 6. Hook listens for ProofVerified event                                │
- * │ 7. Hook returns final result to Frontend                               │
- * └─────────────────────────────────────────────────────────────────────────┘
+ * 1. User inputs private data (assets, liabilities, threshold)
+ * 2. Backend generates REAL Groth16 proof using snarkjs
+ * 3. Frontend receives proof elements (a, b, c) + publicSignals
+ * 4. Keychain signs the proof hash for authorization
+ * 5. Wallet submits proof to ProofXVerifier contract
+ * 6. Contract calls Groth16Verifier for cryptographic verification
+ * 7. UI updates based on on-chain verification result
  * 
- * USAGE:
- *   const { generateAndSubmitProof, status, result, error } = useProofX();
- *   
- *   await generateAndSubmitProof({
- *     institutionId: "acme-bank",
- *     metric: "capital_adequacy",
- *     value: 12,
- *     threshold: 8
- *   });
- * 
+ * SECURITY:
+ * - Private inputs (assets, liabilities) NEVER leave the prover service
+ * - Only proof elements are transmitted (zero-knowledge property)
+ * - Proof elements are NOT logged to prevent exposure
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
 import { useState, useCallback } from "react";
 import { useWeb3 } from "./web3-context";
 import { PROVER_URL } from "./config";
+import { ethers } from "ethers";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type ProofStatus =
-    | "idle"           // Initial state
-    | "connecting"     // Connecting wallet
-    | "generating"     // Calling prover service
-    | "signing"        // Waiting for user to sign in MetaMask
-    | "confirming"     // Waiting for blockchain confirmation
-    | "success"        // Proof verified on-chain
-    | "failure";       // Verification failed (logic or tx error)
+    | "idle"
+    | "connecting"
+    | "generating"     // Prover generating ZK proof
+    | "authorizing"    // Keychain signing
+    | "signing"        // Blockchain tx signing
+    | "confirming"     // Waiting for block confirmation
+    | "success"
+    | "failure";
 
+/** Input for proof generation — private data */
 export interface ProofInput {
     institutionId: string;
     metric: string;
-    value: number;
-    threshold: number;
+    // Real ZK inputs
+    assets: string;       // Private: total assets
+    liabilities: string;  // Private: total liabilities
+    threshold: string;    // Public: compliance threshold
+    // Legacy fields for backward compatibility
+    value?: number;
 }
 
+/** Groth16 proof structure from prover */
+interface Groth16Proof {
+    a: [string, string];
+    b: [[string, string], [string, string]];
+    c: [string, string];
+}
+
+/** Result after on-chain verification */
 export interface ProofResult {
-    commitment: string;
+    proofHash: string;
+    signature: string;
+    signerAddress: string;
     transactionHash: string;
     blockNumber: number;
     verified: boolean;
+    threshold: string;
     timestamp: string;
     gasUsed: string;
+    mode: "real_zk" | "simulated_zk";
 }
 
 interface UseProofXReturn {
-    // State
     status: ProofStatus;
     result: ProofResult | null;
     error: string | null;
-
-    // Actions
     generateAndSubmitProof: (input: ProofInput) => Promise<void>;
     reset: () => void;
-
-    // Wallet state (from Web3 context)
     isConnected: boolean;
     address: string | null;
     connect: () => Promise<void>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KEYCHAIN SIGNING
+// Signs the proof hash for on-chain authorization
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function keychainSignProofHash(
+    signer: { signMessage: (message: Uint8Array | string) => Promise<string>; getAddress: () => Promise<string> },
+    proofHash: string
+): Promise<{ signature: string; signerAddress: string }> {
+    // Convert proof hash to bytes for EIP-191 signing
+    const hashBytes = ethers.getBytes(proofHash);
+    const signature = await signer.signMessage(hashBytes);
+    const signerAddress = await signer.getAddress();
+
+    // Log only non-sensitive metadata
+    console.log("🔑 Keychain signed proof hash:", {
+        signerAddress,
+        hashLength: proofHash.length
+        // NOTE: Proof hash is intentionally NOT logged to prevent exposure
+    });
+
+    return { signature, signerAddress };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,99 +119,132 @@ export function useProofX(): UseProofXReturn {
     const [result, setResult] = useState<ProofResult | null>(null);
     const [error, setError] = useState<string | null>(null);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // RESET STATE
-    // ─────────────────────────────────────────────────────────────────────────
-
     const reset = useCallback(() => {
         setStatus("idle");
         setResult(null);
         setError(null);
     }, []);
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // MAIN FLOW: Generate Proof → Sign → Submit → Confirm
-    // ─────────────────────────────────────────────────────────────────────────
-
     const generateAndSubmitProof = useCallback(async (input: ProofInput) => {
         reset();
 
         try {
-            // ──────────────────────────────────────────────────────────────────
-            // STEP 1: Ensure wallet is connected
-            // ──────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // STEP 1: Ensure wallet connected
+            // ═══════════════════════════════════════════════════════════════
             if (!isConnected) {
                 setStatus("connecting");
                 await connect();
-                // If we just connected, we can't proceed immediately because 'contract' 
-                // in this closure is stale (null). User needs to click again.
-                // We could use refs to get fresh state, but for simplicity/safety:
                 setStatus("idle");
                 return;
             }
 
-            // ──────────────────────────────────────────────────────────────────
-            // STEP 1.5: Ensure correct network
-            // ──────────────────────────────────────────────────────────────────
-            // Note: We need to get fresh values from context or check current state
-            // accessing hooks directly inside callback uses closure values
-
-            // Getting fresh values via window.ethereum is safer for immediate checks after connect
-            // but for now, we rely on the user flow (Connect -> Check -> Submit)
-
-            // To be safe, we can trigger switch if we detect we are ready but on wrong chain
-            // However, useWeb3 context values in this closure might be stale if we just connected
-            // So we'll skip the strict check here and rely on the UI button being disabled 
-            // OR we can try to force switch if we have a provider
-
             if (!contract || !signer) {
-                // If connected but no contract, likely wrong network or disconnected
-                throw new Error("Wallet not fully initialized. Please ensure you are on Sepolia.");
+                throw new Error("Wallet not initialized. Please ensure you are on Sepolia.");
             }
 
-            // ──────────────────────────────────────────────────────────────────
-            // STEP 2: Call Prover Service to generate commitment
-            // ──────────────────────────────────────────────────────────────────
+            // ═══════════════════════════════════════════════════════════════
+            // STEP 2: Generate REAL ZK proof from prover service
+            // The prover runs snarkjs.fullProve() and returns:
+            //   - proof: { a, b, c } — Groth16 proof elements
+            //   - publicSignals: [threshold] — public inputs
+            //   - commitment: hash of proof for reference
+            // ═══════════════════════════════════════════════════════════════
             setStatus("generating");
-            console.log("📝 Calling prover service...", input);
+            console.log("📝 Requesting ZK proof generation...");
+            console.log("   Institution:", input.institutionId);
+            console.log("   Metric:", input.metric);
+            // NOTE: Private inputs NOT logged
 
             const proverResponse = await fetch(`${PROVER_URL}/prove`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(input)
+                body: JSON.stringify({
+                    institutionId: input.institutionId,
+                    metric: input.metric,
+                    assets: input.assets,
+                    liabilities: input.liabilities,
+                    threshold: input.threshold,
+                    // Legacy fallback
+                    value: input.value || parseInt(input.assets) - parseInt(input.liabilities)
+                })
             });
+
+            if (!proverResponse.ok) {
+                const errorText = await proverResponse.text();
+                throw new Error(`Prover error: ${errorText}`);
+            }
 
             const proverData = await proverResponse.json();
 
-            if (!proverData.success || !proverData.commitment) {
-                throw new Error(proverData.error || "Prover service failed");
+            if (!proverData.success) {
+                throw new Error(proverData.error || "Proof generation failed");
             }
 
-            const commitment = proverData.commitment;
-            console.log("✅ Proof generated:", commitment);
+            // Extract proof components
+            const proof: Groth16Proof = proverData.proof;
+            const publicSignals: string[] = proverData.publicSignals;
+            const proofHash: string = proverData.commitment;
+            const mode = proverData.mode || "simulated_zk";
 
-            // ──────────────────────────────────────────────────────────────────
-            // STEP 3: Submit to blockchain (triggers MetaMask popup)
-            // ──────────────────────────────────────────────────────────────────
+            console.log(`✅ ZK proof generated (mode: ${mode})`);
+            // NOTE: Proof elements NOT logged to prevent exposure
+
+            // ═══════════════════════════════════════════════════════════════
+            // STEP 3: Keychain signs the proof hash for authorization
+            // This proves the user authorized this specific proof
+            // ═══════════════════════════════════════════════════════════════
+            setStatus("authorizing");
+            console.log("🔐 Requesting Keychain authorization...");
+
+            const { signature, signerAddress } = await keychainSignProofHash(signer, proofHash);
+
+            // ═══════════════════════════════════════════════════════════════
+            // STEP 4: Submit proof to blockchain
+            // Contract calls Groth16Verifier.verifyProof() internally
+            // ═══════════════════════════════════════════════════════════════
             setStatus("signing");
-            console.log("🔐 Requesting signature...");
+            console.log("📤 Submitting proof to blockchain...");
 
             try {
-                const tx = await contract.verifyProof(commitment);
+                // Convert proof elements to BigInt arrays for contract
+                const proofA: [bigint, bigint] = [
+                    BigInt(proof.a[0]),
+                    BigInt(proof.a[1])
+                ];
+                const proofB: [[bigint, bigint], [bigint, bigint]] = [
+                    [BigInt(proof.b[0][0]), BigInt(proof.b[0][1])],
+                    [BigInt(proof.b[1][0]), BigInt(proof.b[1][1])]
+                ];
+                const proofC: [bigint, bigint] = [
+                    BigInt(proof.c[0]),
+                    BigInt(proof.c[1])
+                ];
+                const pubSignals: [bigint] = [BigInt(publicSignals[0])];
+
+                // Call contract with full Groth16 proof
+                const tx = await contract.verifyProof(
+                    proofA,
+                    proofB,
+                    proofC,
+                    pubSignals,
+                    signature
+                );
+
                 console.log("📤 Transaction sent:", tx.hash);
 
-                // ──────────────────────────────────────────────────────────────────
-                // STEP 4: Wait for confirmation
-                // ──────────────────────────────────────────────────────────────────
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 5: Wait for confirmation
+                // ═══════════════════════════════════════════════════════════════
                 setStatus("confirming");
-                console.log("⏳ Waiting for confirmation...");
+                console.log("⏳ Waiting for block confirmation...");
 
                 const receipt = await tx.wait();
                 console.log("✅ Confirmed in block:", receipt.blockNumber);
 
-                // ──────────────────────────────────────────────────────────────────
-                // STEP 5: Parse ProofVerified event
-                // ──────────────────────────────────────────────────────────────────
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 6: Parse ProofVerified event
+                // ═══════════════════════════════════════════════════════════════
                 const event = receipt.logs
                     .map((log: { topics: string[]; data: string }) => {
                         try {
@@ -196,28 +257,31 @@ export function useProofX(): UseProofXReturn {
 
                 const verified = event?.args?.verified ?? false;
 
-                // ──────────────────────────────────────────────────────────────────
-                // STEP 6: Set final result
-                // ──────────────────────────────────────────────────────────────────
+                // ═══════════════════════════════════════════════════════════════
+                // STEP 7: Set result
+                // ═══════════════════════════════════════════════════════════════
                 setResult({
-                    commitment,
+                    proofHash,
+                    signature,
+                    signerAddress,
                     transactionHash: receipt.hash,
                     blockNumber: receipt.blockNumber,
                     verified,
+                    threshold: publicSignals[0],
                     timestamp: new Date().toISOString(),
-                    gasUsed: receipt.gasUsed.toString()
+                    gasUsed: receipt.gasUsed.toString(),
+                    mode
                 });
 
                 setStatus(verified ? "success" : "failure");
-                console.log(`🎉 Verification ${verified ? "PASSED" : "FAILED"}`);
+                console.log(`🎉 Verification ${verified ? "PASSED ✅" : "FAILED ❌"}`);
 
-            } catch (txError: any) {
-                // Handle user rejection specifically
-                if (txError.code === "ACTION_REJECTED" || txError.code === 4001) {
+            } catch (txError: unknown) {
+                const err = txError as { code?: string | number; message?: string };
+                if (err.code === "ACTION_REJECTED" || err.code === 4001) {
                     throw new Error("Transaction rejected by user");
                 }
-                // Handle network mismatch errors or reverts
-                throw txError;
+                throw new Error(err.message || "Transaction failed");
             }
 
         } catch (err: unknown) {
@@ -227,10 +291,6 @@ export function useProofX(): UseProofXReturn {
             setStatus("failure");
         }
     }, [isConnected, connect, contract, signer, reset]);
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // RETURN
-    // ─────────────────────────────────────────────────────────────────────────
 
     return {
         status,

@@ -23,9 +23,37 @@ import { DEFAULT_NETWORK } from "@/lib/config";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const mockInstitutions = [
-    { id: "acme-bank", name: "ACME Bank", type: "Commercial Bank", value: 12, threshold: 8 },
-    { id: "atlas-capital", name: "Atlas Capital", type: "Investment Fund", value: 15, threshold: 10 },
-    { id: "horizon-exchange", name: "Horizon Exchange", type: "Crypto Exchange", value: 5, threshold: 8 }, // Will fail
+    {
+        id: "acme-bank",
+        name: "ACME Bank",
+        type: "Commercial Bank",
+        value: 12,
+        threshold: 8,
+        // Real ZK inputs (scaled values for demo)
+        assets: "1200000",
+        liabilities: "400000",
+        zkThreshold: "500000"
+    },
+    {
+        id: "atlas-capital",
+        name: "Atlas Capital",
+        type: "Investment Fund",
+        value: 15,
+        threshold: 10,
+        assets: "1500000",
+        liabilities: "500000",
+        zkThreshold: "800000"
+    },
+    {
+        id: "horizon-exchange",
+        name: "Horizon Exchange",
+        type: "Crypto Exchange",
+        value: 5,
+        threshold: 8, // Will fail: capital = 500000 - 450000 = 50000 < 100000
+        assets: "500000",
+        liabilities: "450000",
+        zkThreshold: "100000"
+    },
 ];
 
 const complianceChecks = [
@@ -47,6 +75,7 @@ const statusMessages: Record<ProofStatus, string> = {
     idle: "",
     connecting: "Connecting wallet...",
     generating: "Generating ZK proof...",
+    authorizing: "Keychain authorization...",
     signing: "Please sign in MetaMask...",
     confirming: "Confirming on blockchain...",
     success: "",
@@ -71,7 +100,7 @@ export default function PrototypePage() {
         connect
     } = useProofX();
 
-    const isLoading = ["connecting", "generating", "signing", "confirming"].includes(status);
+    const isLoading = ["connecting", "generating", "authorizing", "signing", "confirming"].includes(status);
     const isComplete = status === "success" || status === "failure";
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -82,8 +111,12 @@ export default function PrototypePage() {
         await generateAndSubmitProof({
             institutionId: selectedInstitution.id,
             metric: "capital_adequacy",
+            // Legacy fields
             value: selectedInstitution.value,
-            threshold: selectedInstitution.threshold
+            threshold: selectedInstitution.zkThreshold,
+            // Real ZK inputs (required for actual proof generation)
+            assets: selectedInstitution.assets,
+            liabilities: selectedInstitution.liabilities
         });
     };
 
@@ -247,6 +280,7 @@ export default function PrototypePage() {
                                                         {[
                                                             { step: "Connecting to prover node...", active: status === "connecting" || status === "generating" },
                                                             { step: "Executing compliance circuit...", active: status === "generating" },
+                                                            { step: "Keychain authorization...", active: status === "authorizing" },
                                                             { step: "Awaiting wallet signature...", active: status === "signing" },
                                                             { step: "Confirming on Ethereum...", active: status === "confirming" },
                                                         ].map((item, index) => (
@@ -352,7 +386,7 @@ export default function PrototypePage() {
                                                     <div className="p-4 bg-[var(--surface-0)] rounded-lg border border-[var(--border-subtle)]">
                                                         <p className="text-label mb-2">Proof Commitment</p>
                                                         <p className="font-mono text-sm text-[var(--text-primary)] break-all">
-                                                            {result.commitment.slice(0, 10)}...{result.commitment.slice(-8)}
+                                                            {result.proofHash.slice(0, 10)}...{result.proofHash.slice(-8)}
                                                         </p>
                                                     </div>
                                                 </div>

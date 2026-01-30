@@ -1,14 +1,21 @@
 {
-  "name": "proofx-temp",
+  "name": "proofx-protocol",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently -n frontend,prover -c cyan,magenta \"next dev\" \"npm run prover\"",
+    "dev:frontend": "next dev",
+    "prover": "node prover/server.js",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup": "npm install && cd prover && npm install && cd ../blockchain && npm install",
+    "compile": "cd blockchain && npx hardhat compile",
+    "deploy:sepolia": "cd blockchain && npx hardhat run scripts/deploy.ts --network sepolia",
+    "deploy:amoy": "cd blockchain && npx hardhat run scripts/deploy.ts --network amoy"
   },
   "dependencies": {
+    "concurrently": "^8.2.2",
     "ethers": "^6.16.0",
     "framer-motion": "^12.29.2",
     "lucide-react": "^0.563.0",

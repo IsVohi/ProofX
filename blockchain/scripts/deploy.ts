@@ -1,47 +1,5 @@
 /**
  * ProofX Protocol - Deployment Script
- * 
- * USAGE:
- * ─────────────────────────────────────────────────────────────────────────────
- * # Deploy to local hardhat network
- * npx hardhat run scripts/deploy.ts
- * 
- * # Deploy to Sepolia testnet
- * npx hardhat run scripts/deploy.ts --network sepolia
- * 
- * # Deploy to Polygon Amoy testnet
- * npx hardhat run scripts/deploy.ts --network amoy
- * ─────────────────────────────────────────────────────────────────────────────
- * 
- * EXPECTED OUTPUT:
- * ─────────────────────────────────────────────────────────────────────────────
- * 
- * ╔═══════════════════════════════════════════════════════════════════════════╗
- * ║                         ProofX Protocol Deployment                        ║
- * ╚═══════════════════════════════════════════════════════════════════════════╝
- * 
- * Network:          sepolia
- * Deployer:         0x742d35Cc6634C0532925a3b844Bc9e7595f2bD12
- * Balance:          0.5 ETH
- * 
- * ─────────────────────────────────────────────────────────────────────────────
- * 
- * Deploying ProofXVerifier...
- * 
- * ✓ ProofXVerifier deployed!
- * 
- *   Contract Address:  0x8A791620dd6260079BF849Dc5567aDC3F2FdC318
- *   Transaction Hash:  0x1234...abcd
- *   Gas Used:          245,892
- * 
- * ─────────────────────────────────────────────────────────────────────────────
- * 
- * Next steps:
- *   1. Verify contract: npx hardhat verify --network sepolia 0x8A79...
- *   2. Update frontend with contract address
- *   3. Test with: npx hardhat console --network sepolia
- * 
- * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { ethers, network } from "hardhat";
@@ -66,42 +24,57 @@ Balance:          ${ethers.formatEther(balance)} ETH
 ───────────────────────────────────────────────────────────────────────────────
 `);
 
-    // Check for sufficient balance
     if (balance === 0n) {
-        console.error("❌ Error: Deployer has no balance. Get testnet ETH from a faucet.");
-        console.log("\n   Sepolia Faucet:  https://sepoliafaucet.com");
-        console.log("   Amoy Faucet:     https://faucet.polygon.technology\n");
+        console.error("❌ Error: Deployer has no balance.");
         process.exit(1);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // DEPLOYMENT
+    // 1. DEPLOY GROTH16 VERIFIER
     // ─────────────────────────────────────────────────────────────────────────
 
-    console.log("Deploying ProofXVerifier...\n");
+    console.log("1. Deploying Groth16Verifier...");
+    const Groth16Verifier = await ethers.getContractFactory("Groth16Verifier");
+    const zkVerifier = await Groth16Verifier.deploy();
+    await zkVerifier.waitForDeployment();
+
+    const zkAddress = await zkVerifier.getAddress();
+    console.log(`   ✓ Groth16Verifier deployed at: ${zkAddress}\n`);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 2. DEPLOY PROOFX VERIFIER
+    // ─────────────────────────────────────────────────────────────────────────
+
+    console.log("2. Deploying ProofXVerifier...");
+    console.log(`   - ZK Verifier: ${zkAddress}`);
+    console.log(`   - Admin:       ${deployer.address}`);
 
     const ProofXVerifier = await ethers.getContractFactory("ProofXVerifier");
-    const verifier = await ProofXVerifier.deploy();
+    // Constructor: (address _zkVerifier, address _admin)
+    const proofXVerifier = await ProofXVerifier.deploy(zkAddress, deployer.address);
+    await proofXVerifier.waitForDeployment();
 
-    await verifier.waitForDeployment();
-
-    const address = await verifier.getAddress();
-    const deployTx = verifier.deploymentTransaction();
+    const proofXAddress = await proofXVerifier.getAddress();
+    const deployTx = proofXVerifier.deploymentTransaction();
     const receipt = await deployTx?.wait();
 
-    console.log(`✓ ProofXVerifier deployed!
+    console.log(`
+✓ ProofXVerifier deployed!
 
-  Contract Address:  ${address}
+  Contract Address:  ${proofXAddress}
   Transaction Hash:  ${deployTx?.hash}
   Gas Used:          ${receipt?.gasUsed?.toString() || "N/A"}
 
 ───────────────────────────────────────────────────────────────────────────────
 
 Next steps:
-  1. Verify contract: npx hardhat verify --network ${network.name} ${address}
-  2. Update frontend with contract address
-  3. Test with: npx hardhat console --network ${network.name}
+  1. Verify Groth16Verifier:
+     npx hardhat verify --network ${network.name} ${zkAddress}
+     
+  2. Verify ProofXVerifier:
+     npx hardhat verify --network ${network.name} ${proofXAddress} ${zkAddress} ${deployer.address}
 
+  3. Update frontend config
 ───────────────────────────────────────────────────────────────────────────────
 `);
 
@@ -112,21 +85,23 @@ Next steps:
     if (network.name === "hardhat" || network.name === "localhost") {
         console.log("Running quick verification test on local network...\n");
 
-        // Generate a mock commitment
-        const commitment = ethers.keccak256(ethers.toUtf8Bytes("test-proof-123"));
+        // Dummy Proof Data (will fail crypto check but pass structure check)
+        const pA: [bigint, bigint] = [0n, 0n];
+        const pB: [[bigint, bigint], [bigint, bigint]] = [[0n, 0n], [0n, 0n]];
+        const pC: [bigint, bigint] = [0n, 0n];
+        const pubSignals: [bigint] = [1000n]; // Threshold
 
-        // Submit for verification
-        const tx = await verifier.verifyProof(commitment);
-        await tx.wait();
+        try {
+            // Note: This IS expected to fail crypto check with "InvalidProof"
+            // or revert if inputs are invalid points.
+            // We just want to see if we can CALL it.
+            console.log("   - Attempting verifyProofSimple (expect revert on dummy data)...");
+            await proofXVerifier.verifyProofSimple(pA, pB, pC, pubSignals);
+        } catch (e: any) {
+            console.log(`   - Transaction reverted as expected (Dummy proof): ${e.message ? "Reverted" : "Failed"}`);
+        }
 
-        // Check result
-        const isVerified = await verifier.isVerified(deployer.address);
-        const total = await verifier.totalVerifications();
-
-        console.log(`  Test commitment:   ${commitment}`);
-        console.log(`  Verified:          ${isVerified}`);
-        console.log(`  Total proofs:      ${total}\n`);
-        console.log("✓ Local test passed!\n");
+        console.log("\n✓ Local sanity check complete.\n");
     }
 }
 

@@ -1,24 +1,26 @@
 /**
- * ═══════════════════════════════════════════════════════════════════════════
  * ProofX Protocol - Configuration Constants
- * ═══════════════════════════════════════════════════════════════════════════
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONTRACT CONFIGURATION
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Deployed ProofXVerifier contract address
-// Update this after deployment!
 export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "";
 
-// ProofXVerifier ABI (minimal, only what frontend needs)
+// ProofXVerifier ABI — Updated for Real ZK Proof Verification
 export const PROOFX_ABI = [
-    "function verifyProof(bytes32 _commitment) external returns (bool verified)",
-    "function isVerified(address _prover) external view returns (bool)",
-    "function getVerification(address _prover) external view returns (bytes32 commitment, uint64 timestamp, bool verified)",
+    // Primary: Submit real Groth16 proof with Keychain signature
+    "function verifyProof(uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[1] calldata _pubSignals, bytes calldata _signature) external returns (bool verified)",
+    // Simplified: No signature (sender = signer)
+    "function verifyProofSimple(uint[2] calldata _pA, uint[2][2] calldata _pB, uint[2] calldata _pC, uint[1] calldata _pubSignals) external returns (bool verified)",
+    // View functions
+    "function isVerified(address _signer) external view returns (bool)",
+    "function getVerification(address _signer) external view returns (bytes32 proofHash, uint64 timestamp, uint64 threshold, bool verified)",
     "function totalVerifications() external view returns (uint256)",
-    "event ProofVerified(address indexed prover, bytes32 indexed commitment, bool verified, uint256 timestamp)"
+    "function zkVerifier() external view returns (address)",
+    // Event with proof details
+    "event ProofVerified(address indexed signer, address indexed submitter, bytes32 indexed proofHash, uint256 threshold, bool verified, uint256 timestamp)"
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -44,7 +46,6 @@ export const SUPPORTED_NETWORKS = {
     }
 };
 
-// Default network
 export const DEFAULT_NETWORK = SUPPORTED_NETWORKS.sepolia;
 
 // ─────────────────────────────────────────────────────────────────────────────

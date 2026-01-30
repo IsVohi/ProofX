@@ -1,82 +1,242 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "./Groth16Verifier.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
+
 /**
- * @title ProofXVerifier
- * @notice On-chain verification layer for compliance proof commitments.
- * @dev Stores NO raw data. Only commitment hashes. ZK verification is simulated.
+ * ═══════════════════════════════════════════════════════════════════════════
+ * ProofX Protocol — Production ZK Verifier
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ * DESIGN:
+ * - REAL ZK: Validates Groth16 proofs via Groth16Verifier
+ * - AUTHZ: Only authorized signers can approve proofs (Keychain)
+ * - REPLAY SAFETY: Prevents reusing the same proof hash
+ * - EMERGENCY: Can be paused by admin
+ *
+ * ═══════════════════════════════════════════════════════════════════════════
  */
-contract ProofXVerifier {
+contract ProofXVerifier is AccessControl, Pausable, ReentrancyGuard {
+    using ECDSA for bytes32;
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ROLES
+    // ═══════════════════════════════════════════════════════════════════════
     
-    /// @dev Packed struct: 32 + 8 + 1 = 41 bytes (fits in 2 slots, but commitment dominates)
+    bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// @notice Reference to the Groth16 ZK verifier contract
+    Groth16Verifier public immutable zkVerifier;
+
+    /// @dev Verification record
     struct VerificationRecord {
-        bytes32 commitment;
-        uint64 timestamp;
-        bool verified;
+        bytes32 proofHash;      // Unique identifier of the proof
+        uint64 timestamp;       // Block timestamp
+        uint64 threshold;       // Public input used
+        bool verified;          // Result
     }
 
-    /// @notice Prover address → verification record
+    /// @notice Signer address → Last Verification Record
     mapping(address => VerificationRecord) public verifications;
+    
+    /// @notice Prevent replay attacks: proofHash -> already used?
+    mapping(bytes32 => bool) public usedProofHashes;
 
     /// @notice Total successful verifications
     uint256 public totalVerifications;
 
-    /// @notice Emitted on every verification attempt
+    // ═══════════════════════════════════════════════════════════════════════
+    // EVENTS
+    // ═══════════════════════════════════════════════════════════════════════
+
     event ProofVerified(
-        address indexed prover,
-        bytes32 indexed commitment,
+        address indexed signer,
+        address indexed submitter,
+        bytes32 indexed proofHash,
+        uint256 threshold,
         bool verified,
         uint256 timestamp
     );
 
-    /// @notice Thrown when commitment is zero
-    error EmptyCommitment();
+    // ═══════════════════════════════════════════════════════════════════════
+    // ERRORS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    error InvalidSignature();
+    error UnauthorizedSigner();
+    error ProofAlreadyUsed();
+    error InvalidProof();
+    error ZeroAddress();
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // CONSTRUCTOR
+    // ═══════════════════════════════════════════════════════════════════════
+
+    constructor(address _zkVerifier, address _admin) {
+        if (_zkVerifier == address(0)) revert ZeroAddress();
+        if (_admin == address(0)) revert ZeroAddress();
+
+        zkVerifier = Groth16Verifier(_zkVerifier);
+
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+        _grantRole(PAUSER_ROLE, _admin);
+        // Admin is also a signer for testing, but should be separated in prod
+        _grantRole(SIGNER_ROLE, _admin);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // VERIFICATION LOGIC
+    // ═══════════════════════════════════════════════════════════════════════
 
     /**
-     * @notice Submit a proof commitment for verification
-     * @param _commitment 32-byte hash from ZK prover (simulated in hackathon)
-     * @return verified True if proof passes verification
-     * @dev INTEGRATION POINT: Replace _mockVerify() with real ZK verifier call
+     * @notice Verify a Groth16 ZK proof with authorization
+     * @dev Protected by nonReentrant and whenNotPaused
      */
-    function verifyProof(bytes32 _commitment) external returns (bool verified) {
-        if (_commitment == bytes32(0)) revert EmptyCommitment();
+    function verifyProof(
+        uint[2] calldata _pA,
+        uint[2][2] calldata _pB,
+        uint[2] calldata _pC,
+        uint[1] calldata _pubSignals,
+        bytes calldata _signature
+    ) 
+        external 
+        whenNotPaused 
+        nonReentrant 
+        returns (bool verified) 
+    {
+        // 1. Compute Hash
+        bytes32 proofHash = keccak256(
+            abi.encode(_pA, _pB, _pC, _pubSignals[0])
+        );
 
-        // Simulated ZK verification — replace with Groth16/PLONK verifier
-        verified = _mockVerify(_commitment);
+        // 2. Replay Check
+        if (usedProofHashes[proofHash]) revert ProofAlreadyUsed();
 
-        verifications[msg.sender] = VerificationRecord({
-            commitment: _commitment,
+        // 3. Authorization Check
+        // Recover signer from hash
+        bytes32 ethSignedHash = MessageHashUtils.toEthSignedMessageHash(proofHash);
+        address signer = ECDSA.recover(ethSignedHash, _signature);
+
+        if (!hasRole(SIGNER_ROLE, signer)) revert UnauthorizedSigner();
+        
+        // 4. ZK Cryptographic Check
+        verified = zkVerifier.verifyProof(_pA, _pB, _pC, _pubSignals);
+        
+        if (!verified) revert InvalidProof();
+
+        // 5. State Update
+        usedProofHashes[proofHash] = true;
+        
+        verifications[signer] = VerificationRecord({
+            proofHash: proofHash,
             timestamp: uint64(block.timestamp),
-            verified: verified
+            threshold: uint64(_pubSignals[0]),
+            verified: true
         });
 
-        if (verified) {
-            unchecked { ++totalVerifications; }
-        }
+        unchecked { ++totalVerifications; }
 
-        emit ProofVerified(msg.sender, _commitment, verified, block.timestamp);
-    }
-
-    /// @notice Check if address has verified proof
-    function isVerified(address _prover) external view returns (bool) {
-        return verifications[_prover].verified;
-    }
-
-    /// @notice Get full verification record
-    function getVerification(address _prover)
-        external
-        view
-        returns (bytes32 commitment, uint64 timestamp, bool verified)
-    {
-        VerificationRecord storage r = verifications[_prover];
-        return (r.commitment, r.timestamp, r.verified);
+        emit ProofVerified(
+            signer,
+            msg.sender,
+            proofHash,
+            _pubSignals[0],
+            true,
+            block.timestamp
+        );
     }
 
     /**
-     * @dev Mock ZK verification — passes if first byte is non-zero.
-     *      Replace with: IGroth16Verifier(addr).verify(proof, publicInputs)
+     * @notice Simulation / Legacy verification (Sender = Signer)
+     * @dev Only allowed for Authorized Signers
      */
-    function _mockVerify(bytes32 _commitment) internal pure returns (bool) {
-        return uint8(_commitment[0]) != 0;
+    function verifyProofSimple(
+        uint[2] calldata _pA,
+        uint[2][2] calldata _pB,
+        uint[2] calldata _pC,
+        uint[1] calldata _pubSignals
+    ) 
+        external 
+        whenNotPaused
+        nonReentrant 
+        returns (bool verified) 
+    {
+        // Explicitly check if sender is authorized
+        if (!hasRole(SIGNER_ROLE, msg.sender)) revert UnauthorizedSigner();
+
+        bytes32 proofHash = keccak256(
+            abi.encode(_pA, _pB, _pC, _pubSignals[0])
+        );
+
+         // Replay Check
+        if (usedProofHashes[proofHash]) revert ProofAlreadyUsed();
+
+        verified = zkVerifier.verifyProof(_pA, _pB, _pC, _pubSignals);
+        
+        if (!verified) revert InvalidProof();
+
+        usedProofHashes[proofHash] = true;
+
+        verifications[msg.sender] = VerificationRecord({
+            proofHash: proofHash,
+            timestamp: uint64(block.timestamp),
+            threshold: uint64(_pubSignals[0]),
+            verified: true
+        });
+
+        unchecked { ++totalVerifications; }
+
+        emit ProofVerified(
+            msg.sender,
+            msg.sender,
+            proofHash,
+            _pubSignals[0],
+            true,
+            block.timestamp
+        );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ADMIN FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // VIEW FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    function isVerified(address _signer) external view returns (bool) {
+        return verifications[_signer].verified;
+    }
+
+    function getVerification(address _signer)
+        external
+        view
+        returns (
+            bytes32 proofHash,
+            uint64 timestamp,
+            uint64 threshold,
+            bool verified
+        )
+    {
+        VerificationRecord storage r = verifications[_signer];
+        return (r.proofHash, r.timestamp, r.threshold, r.verified);
     }
 }
