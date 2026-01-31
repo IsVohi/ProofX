@@ -39,7 +39,7 @@ node_modules/
 /circuits/build/
 /circuits/node_modules/
 *.ptau
-*.zkey
+# *.zkey (required for prod)
 *.wtns
 *.r1cs
 *.sym
