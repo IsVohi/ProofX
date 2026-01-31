@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "ProofX Protocol - ZK Circuits",
     "scripts": {
-        "compile": "circom compliance.circom --r1cs --wasm --sym -o build",
+        "compile": "circom compliance.circom --r1cs --wasm --sym -o build -l node_modules",
         "setup": "snarkjs groth16 setup build/compliance.r1cs pot12_final.ptau circuit_0000.zkey",
         "contribute": "snarkjs zkey contribute circuit_0000.zkey circuit_final.zkey --name=\"ProofX Contributor\"",
         "export:vkey": "snarkjs zkey export verificationkey circuit_final.zkey verification_key.json",
