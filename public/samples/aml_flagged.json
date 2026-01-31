@@ -1,0 +1,52 @@
+{
+  "documentType": "AML Screening Report",
+  "version": "1.0",
+  "entity": {
+    "name": "Shadow Trading Corp",
+    "registrationNumber": "REG-2022-99999",
+    "country": "India",
+    "sector": "Financial Services",
+    "establishedDate": "2022-01-01"
+  },
+  "screening": {
+    "sanctionsList": true,
+    "pepList": true,
+    "adverseMedia": true,
+    "watchlists": true,
+    "lastScreened": "2025-01-28T00:00:00Z"
+  },
+  "transactionAnalysis": {
+    "totalTransactions": 890,
+    "suspiciousTransactions": 45,
+    "highRiskCountries": 12,
+    "cashTransactions": 156,
+    "structuringPatterns": true
+  },
+  "riskAssessment": {
+    "riskScore": 85,
+    "maxRisk": 50,
+    "riskLevel": "Critical",
+    "factors": [
+      "Sanctions list match",
+      "PEP association",
+      "Adverse media coverage",
+      "Structuring patterns detected",
+      "High-risk jurisdiction transactions"
+    ]
+  },
+  "compliance": {
+    "riskScore": 85,
+    "maxRisk": 50,
+    "strFiled": 12,
+    "ctrFiled": 156
+  },
+  "metadata": {
+    "generatedAt": "2025-01-28T10:00:00Z",
+    "provider": "FIU India",
+    "signature": "0x7d3d70f9eff4a8cb2490d55d0431bd8637dd39ddb72b03324badab06db219c0862f12a2292a1ea6b1debbbac77f87074ed21777097a301bad1a65f6cfcf7d9b71c",
+    "issuerAddress": "0xAe72A48c1a36bd18Af168541c53037965d26e4A8",
+    "issuerName": "FIU India",
+    "signedAt": "2026-01-30T22:16:11.274Z",
+    "messageHash": "0x533450f61beb43e8b3211fa52c4e864caba33623084697c4bc4d25425fae6623"
+  }
+}

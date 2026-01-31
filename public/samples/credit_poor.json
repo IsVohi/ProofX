@@ -1,0 +1,46 @@
+{
+  "documentType": "Credit Report",
+  "version": "1.0",
+  "borrower": {
+    "name": "Shaky Enterprises",
+    "pan": "AADCS9876P",
+    "cin": "U45200DL2020PTC654321",
+    "sector": "Retail",
+    "yearsInBusiness": 3
+  },
+  "creditProfile": {
+    "creditScore": 520,
+    "scoreRange": "300-900",
+    "scoreCategory": "Poor",
+    "lastUpdated": "2025-01-20T00:00:00Z"
+  },
+  "loanHistory": {
+    "totalAccounts": 5,
+    "activeAccounts": 4,
+    "closedAccounts": 1,
+    "totalSanctioned": 10000000,
+    "currentOutstanding": 8500000,
+    "overdueAmount": 2500000
+  },
+  "repaymentHistory": {
+    "onTimePayments": 24,
+    "latePayments": 18,
+    "defaults": 2,
+    "settlements": 1
+  },
+  "compliance": {
+    "score": 520,
+    "minScore": 700,
+    "delinquencyStatus": "90+ DPD",
+    "writeoffs": 500000
+  },
+  "metadata": {
+    "generatedAt": "2025-01-25T10:00:00Z",
+    "bureau": "CIBIL",
+    "signature": "0xfe04fa7078a310f830304c2964f95f854960ad819c25f654e068799dd2d5cdea2257283f8ad9096956a9153fff90017a962937a51aeaa0c88b5b4d998808dc7e1c",
+    "issuerAddress": "0xdb2430B4e9AC14be6554d3942822BE74811A1AF9",
+    "issuerName": "CIBIL",
+    "signedAt": "2026-01-30T22:16:11.268Z",
+    "messageHash": "0xd4f19de2043257c0283ac684141610162aa5e9412ab447c9346528f835f5e81b"
+  }
+}

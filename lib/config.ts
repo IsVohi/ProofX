@@ -52,4 +52,8 @@ export const DEFAULT_NETWORK = SUPPORTED_NETWORKS.sepolia;
 // PROVER SERVICE CONFIGURATION
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const PROVER_URL = process.env.NEXT_PUBLIC_PROVER_URL || "http://localhost:3001";
+// Development: Use standalone server (faster, no Next.js API limits)
+// Production (Vercel): Use internal API route
+export const PROVER_URL = process.env.NODE_ENV === "development"
+    ? "http://localhost:3001"
+    : "/api";

@@ -28,12 +28,12 @@ const features = [
   },
 ];
 
-const trustedBy = [
-  "Goldman Sachs",
-  "JPMorgan",
-  "Citadel",
-  "BlackRock",
-  "Fidelity",
+const useCases = [
+  "Banking",
+  "Tax Compliance",
+  "KYC/AML",
+  "Credit Scoring",
+  "Identity Verification",
 ];
 
 export default function HomePage() {
@@ -150,15 +150,15 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* Trusted By */}
+      {/* Use Cases */}
       <section className="py-16 border-y border-[var(--border-subtle)]">
         <Container>
           <FadeIn>
-            <p className="text-center text-label mb-8">Trusted by Industry Leaders</p>
-            <div className="flex flex-wrap justify-center items-center gap-12 opacity-40">
-              {trustedBy.map((company) => (
-                <span key={company} className="text-lg font-medium text-[var(--text-secondary)]">
-                  {company}
+            <p className="text-center text-label mb-8">Supported Verification Types</p>
+            <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+              {useCases.map((useCase) => (
+                <span key={useCase} className="text-lg font-medium text-[var(--text-secondary)] px-4 py-2 bg-[var(--surface-1)] rounded-full">
+                  {useCase}
                 </span>
               ))}
             </div>
@@ -226,7 +226,7 @@ export default function HomePage() {
               <span className="text-h3 text-[var(--text-primary)]">ProofX</span>
             </div>
             <p className="text-sm text-[var(--text-tertiary)]">
-              © 2025 ProofX Protocol. All rights reserved.
+              © 2026 ProofX Protocol. Built for ETHGlobal.
             </p>
           </div>
         </Container>

@@ -7,27 +7,27 @@ import { Section, FadeIn, Card, Button, Label, Container } from "@/components/ui
 
 const metrics = [
     {
-        value: "$2.4T",
-        label: "Assets Under Verification",
-        description: "Annual compliance verification volume",
+        value: "6",
+        label: "Verification Types",
+        description: "KYC, GST, Bank, Capital, Credit, AML",
         icon: TrendingUp,
     },
     {
-        value: "340+",
-        label: "Institutions Onboarded",
-        description: "Banks, funds, and financial services",
+        value: "8",
+        label: "Trusted Issuers",
+        description: "Including UIDAI, RBI, GSTN, CIBIL",
         icon: Building,
     },
     {
-        value: "47",
-        label: "Countries Supported",
-        description: "Global regulatory coverage",
+        value: "<2s",
+        label: "Proof Generation",
+        description: "Real Groth16 ZK proofs",
         icon: Globe,
     },
     {
-        value: "99.99%",
-        label: "Verification Accuracy",
-        description: "Cryptographic certainty",
+        value: "100%",
+        label: "Privacy Preserved",
+        description: "Zero data exposure",
         icon: Shield,
     },
 ];
@@ -85,8 +85,8 @@ export default function ImpactPage() {
                         <span className="text-[var(--text-secondary)]">Institutional Trust.</span>
                     </h1>
                     <p className="text-body-lg text-[var(--text-secondary)] max-w-2xl">
-                        ProofX is transforming how financial institutions approach compliance,
-                        privacy, and trust verification at unprecedented scale.
+                        ProofX enables privacy-preserving compliance verification using
+                        zero-knowledge proofs. Verify without exposing sensitive data.
                     </p>
                 </motion.div>
             </Section>
@@ -192,12 +192,12 @@ export default function ImpactPage() {
                             {/* Stats overlay */}
                             <div className="absolute bottom-6 left-6 right-6 flex justify-between">
                                 <div className="bg-[var(--surface-1)]/90 backdrop-blur px-4 py-2 rounded-lg border border-[var(--border-subtle)]">
-                                    <p className="text-label">Active Nodes</p>
-                                    <p className="text-h3 text-[var(--accent)] font-mono">42</p>
+                                    <p className="text-label">Network</p>
+                                    <p className="text-h3 text-[var(--accent)] font-mono">Sepolia</p>
                                 </div>
                                 <div className="bg-[var(--surface-1)]/90 backdrop-blur px-4 py-2 rounded-lg border border-[var(--border-subtle)]">
-                                    <p className="text-label">Daily Verifications</p>
-                                    <p className="text-h3 text-[var(--accent)] font-mono">1.2M+</p>
+                                    <p className="text-label">Proof System</p>
+                                    <p className="text-h3 text-[var(--accent)] font-mono">Groth16</p>
                                 </div>
                             </div>
                         </div>

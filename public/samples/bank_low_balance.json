@@ -1,0 +1,39 @@
+{
+  "documentType": "Bank Statement",
+  "version": "1.0",
+  "account": {
+    "holderName": "Struggling Ventures",
+    "accountNumber": "XXXX XXXX 7832",
+    "bankName": "HDFC Bank",
+    "ifsc": "HDFC0001567",
+    "accountType": "Current Account",
+    "period": "January 2025"
+  },
+  "summary": {
+    "openingBalance": 150000,
+    "totalCredits": 500000,
+    "totalDebits": 620000,
+    "closingBalance": 30000,
+    "averageBalance": 90000
+  },
+  "transactions": {
+    "creditCount": 12,
+    "debitCount": 45,
+    "largestCredit": 100000,
+    "largestDebit": 150000
+  },
+  "compliance": {
+    "currentBalance": 30000,
+    "minBalance": 500000,
+    "avgMonthlyBalance": 90000
+  },
+  "metadata": {
+    "generatedAt": "2025-01-31T10:00:00Z",
+    "source": "HDFC NetBanking",
+    "signature": "0xfba6f31f2b3215bbde78efdfb83caf360bc8dd0ec5411ac835d23a1284b85722703d0f7e83fdba02f33127172600a72eedfc50e821892a0205bfb03871008fe61b",
+    "issuerAddress": "0x7564105E977516C53bE337314c7E53838967bDaC",
+    "issuerName": "HDFC Bank",
+    "signedAt": "2026-01-30T22:16:11.258Z",
+    "messageHash": "0x3cf7a89564db8744eef7cbc2508549156e13565e0a57f3db8dee819f3c75c765"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "documentType": "Financial Statement",
+  "version": "1.0",
+  "institution": {
+    "name": "ACME Bank",
+    "id": "ACME-2024-001",
+    "type": "Commercial Bank",
+    "reportingPeriod": "Q4 2024"
+  },
+  "financialData": {
+    "assets": {
+      "cash": 500000,
+      "investments": 400000,
+      "loans": 200000,
+      "property": 100000,
+      "total": 1200000
+    },
+    "liabilities": {
+      "deposits": 300000,
+      "borrowings": 80000,
+      "otherLiabilities": 20000,
+      "total": 400000
+    },
+    "capital": 800000
+  },
+  "metadata": {
+    "generatedAt": "2024-12-15T10:30:00Z",
+    "auditor": "BigFour Auditors LLP",
+    "signature": "0xbe1ee75f146a2bdf5ce2233b6ab0801c5f4f88e044bc33c6dafeb4140aeefe663199a38f2afe92ff59a7978c69d912df425a9a26e953709441e63f8a96f5f02f1c",
+    "issuerAddress": "0x1563915e194D8CfBA1943570603F7606A3115508",
+    "issuerName": "Reserve Bank of India",
+    "signedAt": "2026-01-30T22:16:11.243Z",
+    "messageHash": "0x8478b8f25bff75a90cd25c732334464defebea36b2c02ead6546dd32a8ad512f"
+  }
+}

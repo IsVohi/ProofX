@@ -1,0 +1,46 @@
+{
+  "documentType": "AML Screening Report",
+  "version": "1.0",
+  "entity": {
+    "name": "Global Trade Partners Ltd",
+    "registrationNumber": "REG-2020-45678",
+    "country": "India",
+    "sector": "Import/Export",
+    "establishedDate": "2015-03-20"
+  },
+  "screening": {
+    "sanctionsList": false,
+    "pepList": false,
+    "adverseMedia": false,
+    "watchlists": false,
+    "lastScreened": "2025-01-28T00:00:00Z"
+  },
+  "transactionAnalysis": {
+    "totalTransactions": 1250,
+    "suspiciousTransactions": 0,
+    "highRiskCountries": 0,
+    "cashTransactions": 12,
+    "structuringPatterns": false
+  },
+  "riskAssessment": {
+    "riskScore": 15,
+    "maxRisk": 50,
+    "riskLevel": "Low",
+    "factors": []
+  },
+  "compliance": {
+    "riskScore": 15,
+    "maxRisk": 50,
+    "strFiled": 0,
+    "ctrFiled": 12
+  },
+  "metadata": {
+    "generatedAt": "2025-01-28T09:00:00Z",
+    "provider": "FIU India",
+    "signature": "0x9c630d324c5b795fbfaf28c7181b541287b039284385e351f96da8ee85d6cea730364dc0fe2fb7e72f0ee85fab9e74e024c9d5fc4b3bc62fa6314e42e2dfb4111b",
+    "issuerAddress": "0xAe72A48c1a36bd18Af168541c53037965d26e4A8",
+    "issuerName": "FIU India",
+    "signedAt": "2026-01-30T22:16:11.271Z",
+    "messageHash": "0x9865aa1c3eb68b767ac602d9e22d0ed20d6d76946016b5066af02c9272c0abb0"
+  }
+}

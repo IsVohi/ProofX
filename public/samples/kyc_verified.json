@@ -1,0 +1,50 @@
+{
+  "documentType": "KYC Verification",
+  "version": "1.0",
+  "identity": {
+    "fullName": "Rajesh Kumar Sharma",
+    "dateOfBirth": "1985-06-15",
+    "gender": "Male",
+    "nationality": "Indian",
+    "occupation": "Business Owner"
+  },
+  "documents": {
+    "aadhaar": {
+      "number": "XXXX XXXX 4521",
+      "verified": true,
+      "verifiedOn": "2025-01-10T00:00:00Z"
+    },
+    "pan": {
+      "number": "AASPS1234K",
+      "verified": true,
+      "verifiedOn": "2025-01-10T00:00:00Z"
+    },
+    "passport": {
+      "number": "J8765432",
+      "verified": true,
+      "verifiedOn": "2025-01-10T00:00:00Z"
+    },
+    "addressProof": {
+      "type": "Utility Bill",
+      "verified": true,
+      "verifiedOn": "2025-01-10T00:00:00Z"
+    }
+  },
+  "verification": {
+    "verificationScore": 95,
+    "minScore": 80,
+    "riskCategory": "Low",
+    "pep": false,
+    "sanctions": false,
+    "adverseMedia": false
+  },
+  "metadata": {
+    "generatedAt": "2025-01-15T09:00:00Z",
+    "verifier": "DigiLocker Verified",
+    "signature": "0xbf9eb501e98532365c346e530f999c82dc147f9fd6e3de7220cbc373a96753d5653ae56c7bf47fbd3dac5263d92e91e5302f17b118e46ffc5e8dc71159cbe0c21c",
+    "issuerAddress": "0x62f94E9AC9349BCCC61Bfe66ddAdE6292702EcB6",
+    "issuerName": "DigiLocker",
+    "signedAt": "2026-01-30T22:16:11.261Z",
+    "messageHash": "0x85242dd387564379ad83b97c25a46c566408c211e50cad47f3d67b5478c12188"
+  }
+}

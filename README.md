@@ -76,38 +76,50 @@ ProofX/
 
 ---
 
-## 🔐 Keychain Integration
+## 🔐 Keychain Integration & ZK Privacy
 
-ProofX uses Keychain as its cryptographic authorization layer. Before a compliance proof can be recorded on Ethereum, the submitting institution must sign the proof commitment with their private key. The smart contract verifies this signature on-chain using ECDSA recovery, ensuring that proofs can only be submitted by their rightful owners.
+ProofX uses Keychain as its cryptographic authorization layer and Groth16 for privacy.
 
 **What's Real:**
-- ✅ Keychain signing (EIP-191 personal_sign)
-- ✅ Blockchain transactions (Sepolia/Amoy)
-- ✅ Smart contract verification
+- ✅ **Groth16 Zero-Knowledge Proofs** (Real circuit execution)
+- ✅ **Keychain Signing** (EIP-191 personal_sign)
+- ✅ **Blockchain Verification** (Sepolia/Amoy)
+- ✅ **Trusted Issuers Registry** (On-chain verification)
 
-**What's Simulated:**
-- ⚡ ZK proof generation (deterministic hash for hackathon)
+**Trusted Issuers Supported:**
+- 🏛️ **UIDAI** (Aadhaar/eKYC with XML DSig)
+- 🏦 **Central Banks** (RBI, Federal Reserve)
+- 🏢 **Commercial Banks** (HDFC, SBI)
+- 📊 **Credit Bureaus** (CIBIL)
 
 ---
 
 ## 🎯 Demo Flow
 
 1. **Connect Wallet** — MetaMask on Sepolia
-2. **Select Institution** — Choose compliance scenario
-3. **Generate Proof** — Prover creates commitment
-4. **Keychain Authorization** — Sign with your key
-5. **Submit to Blockchain** — Real transaction
-6. **Verified** — Check on Etherscan
+2. **Select Verification** — KYC, Capital, Bank, etc.
+3. **Upload Document** — Upload real JSON (e.g., Aadhaar) or use sample
+4. **Generate Proof** — Client-side ZK proof generation
+5. **Keychain Authorization** — Sign with your key
+6. **Submit to Blockchain** — Real transaction
+7. **Download Proof** — Export standardized JSON proof
 
 ---
 
 ## 📋 Environment Variables
 
-Create `.env.local` in the root:
+Create `.env` in the root (see `.env.example`):
 
 ```env
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x...  # Deployed contract
+# Contract Address (Sepolia)
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x3146ee369B979c2f776C3A74790b228C6BfE0673
+
+# Prover Service
 NEXT_PUBLIC_PROVER_URL=http://localhost:3001
+
+# Blockchain (for deployment)
+PRIVATE_KEY=your_private_key
+RPC_URL=https://sepolia.infura.io/v3/...
 ```
 
 ---
@@ -115,17 +127,19 @@ NEXT_PUBLIC_PROVER_URL=http://localhost:3001
 ## 🛠️ Deployment
 
 ```bash
-# 1. Configure blockchain/.env with your private key
-cd blockchain
-cp .env.example .env
-# Edit with PRIVATE_KEY and RPC URLs
+# 1. Install dependencies
+npm run setup
 
-# 2. Deploy
+# 2. Compile circuits (optional, artifacts included)
+# npm run compile:circuits
+
+# 3. Deploy contracts
 npm run deploy:sepolia
 
-# 3. Copy contract address to frontend .env.local
+# 4. Start app
+npm run dev
 ```
 
 ---
 
-*Built for ETHIndia 2026*
+*Built for ETHGlobal*

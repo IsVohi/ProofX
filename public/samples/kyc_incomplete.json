@@ -1,0 +1,50 @@
+{
+  "documentType": "KYC Verification",
+  "version": "1.0",
+  "identity": {
+    "fullName": "Unknown Person",
+    "dateOfBirth": "1990-01-01",
+    "gender": "Male",
+    "nationality": "Indian",
+    "occupation": "Unknown"
+  },
+  "documents": {
+    "aadhaar": {
+      "number": "XXXX XXXX 0000",
+      "verified": false,
+      "verifiedOn": null
+    },
+    "pan": {
+      "number": "XXXXX0000X",
+      "verified": false,
+      "verifiedOn": null
+    },
+    "passport": {
+      "number": null,
+      "verified": false,
+      "verifiedOn": null
+    },
+    "addressProof": {
+      "type": null,
+      "verified": false,
+      "verifiedOn": null
+    }
+  },
+  "verification": {
+    "verificationScore": 25,
+    "minScore": 80,
+    "riskCategory": "High",
+    "pep": false,
+    "sanctions": true,
+    "adverseMedia": true
+  },
+  "metadata": {
+    "generatedAt": "2025-01-15T10:00:00Z",
+    "verifier": "Pending Verification",
+    "signature": "0x741584bc8999010270116fc93724345c945a36c0d268c779fc5f3c10a3cba2013812c724924ec6587b2dcb61bdf59a02734bd64b23f77cbf21a39e0e44d217ef1c",
+    "issuerAddress": "0x62f94E9AC9349BCCC61Bfe66ddAdE6292702EcB6",
+    "issuerName": "DigiLocker",
+    "signedAt": "2026-01-30T22:16:11.263Z",
+    "messageHash": "0x3db6d69fb372ec3c1ff4848b09bf5837493cfedc43f34ad7d2e2e3ecf4e1563f"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "documentType": "Credit Report",
+  "version": "1.0",
+  "borrower": {
+    "name": "Priya Investments Corp",
+    "pan": "AADCP5678Q",
+    "cin": "U67190MH2015PTC123456",
+    "sector": "Financial Services",
+    "yearsInBusiness": 10
+  },
+  "creditProfile": {
+    "creditScore": 820,
+    "scoreRange": "300-900",
+    "scoreCategory": "Excellent",
+    "lastUpdated": "2025-01-20T00:00:00Z"
+  },
+  "loanHistory": {
+    "totalAccounts": 8,
+    "activeAccounts": 3,
+    "closedAccounts": 5,
+    "totalSanctioned": 50000000,
+    "currentOutstanding": 12000000,
+    "overdueAmount": 0
+  },
+  "repaymentHistory": {
+    "onTimePayments": 96,
+    "latePayments": 0,
+    "defaults": 0,
+    "settlements": 0
+  },
+  "compliance": {
+    "score": 820,
+    "minScore": 700,
+    "delinquencyStatus": "None",
+    "writeoffs": 0
+  },
+  "metadata": {
+    "generatedAt": "2025-01-25T09:00:00Z",
+    "bureau": "CIBIL",
+    "signature": "0xd5ea8b8b87189e4610fcc2cf8dc4deaa529a34e8e6988f9e44b6be90383c1d51236e769446760f138f2a29eaa590a90870fcebbc5e1373eab44933351fbfc8bd1b",
+    "issuerAddress": "0xdb2430B4e9AC14be6554d3942822BE74811A1AF9",
+    "issuerName": "CIBIL",
+    "signedAt": "2026-01-30T22:16:11.265Z",
+    "messageHash": "0x2931ca81a5caa6dc9a4ee91e10910c6b0f16d32e1cbd33647c938892e898a1ec"
+  }
+}

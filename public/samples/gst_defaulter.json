@@ -1,0 +1,44 @@
+{
+  "documentType": "GST Returns",
+  "version": "1.0",
+  "business": {
+    "name": "QuickMart Retail",
+    "gstin": "29AADCQ5678R1ZQ",
+    "pan": "AADCQ5678R",
+    "state": "Karnataka",
+    "period": "January 2025"
+  },
+  "returns": {
+    "gstr1": {
+      "totalSales": 2500000,
+      "taxableValue": 2118644,
+      "igst": 190678,
+      "cgst": 95339,
+      "sgst": 95339,
+      "totalTax": 381356
+    },
+    "gstr3b": {
+      "outputTax": 381356,
+      "inputTaxCredit": 150000,
+      "netTaxLiability": 231356,
+      "taxPaid": 100000,
+      "lateFee": 2000,
+      "interest": 5500
+    }
+  },
+  "compliance": {
+    "taxLiability": 231356,
+    "taxPaid": 100000,
+    "filingStatus": "Partial Payment",
+    "filingDate": "2025-01-15T00:00:00Z"
+  },
+  "metadata": {
+    "generatedAt": "2025-01-20T10:00:00Z",
+    "source": "GST Portal",
+    "signature": "0xc67da2511e516d511a80755ee7daa00ac2e3cf263386ea00310f43fa207904bb5e720af14348093743d5e8958d429bfa95a6a1c8f2b669267228129fdf4e89671b",
+    "issuerAddress": "0xe1fAE9b4fAB2F5726677ECfA912d96b0B683e6a9",
+    "issuerName": "GSTN",
+    "signedAt": "2026-01-30T22:16:11.254Z",
+    "messageHash": "0x97c2afd5d73ad5c015f5a44826d6fa750d552387042e0cf7ef577fa865ef4f60"
+  }
+}

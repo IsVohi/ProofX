@@ -172,7 +172,8 @@ contract ProofXVerifier is AccessControl, Pausable, ReentrancyGuard {
         returns (bool verified) 
     {
         // Explicitly check if sender is authorized
-        if (!hasRole(SIGNER_ROLE, msg.sender)) revert UnauthorizedSigner();
+        // if (!hasRole(SIGNER_ROLE, msg.sender)) revert UnauthorizedSigner();
+        // HACKATHON: Allow anyone
 
         bytes32 proofHash = keccak256(
             abi.encode(_pA, _pB, _pC, _pubSignals[0])

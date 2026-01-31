@@ -1,0 +1,35 @@
+{
+  "documentType": "Financial Statement",
+  "version": "1.0",
+  "institution": {
+    "name": "HighCap Global Bank",
+    "id": "HIGHCAP-2024-001",
+    "type": "Global Commercial Bank",
+    "reportingPeriod": "Q4 2024"
+  },
+  "financialData": {
+    "assets": {
+      "cash": 2000000,
+      "investments": 1500000,
+      "loans": 800000,
+      "property": 200000,
+      "total": 4500000
+    },
+    "liabilities": {
+      "deposits": 2000000,
+      "borrowings": 500000,
+      "otherLiabilities": 100000,
+      "total": 2600000
+    },
+    "capital": 1900000
+  },
+  "metadata": {
+    "generatedAt": "2024-12-20T09:00:00Z",
+    "auditor": "TopTier Auditors LLP",
+    "signature": "0xc30535f2746d57626dedc3dd50fc866123204a3f9687a6de1a8a3c14da4ed4ff15e588c85126a2173a842f5a9adef2d987d74c9709f425c58c1e5c3aff917fd31b",
+    "issuerAddress": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A",
+    "issuerName": "Federal Reserve",
+    "signedAt": "2026-01-30T22:16:11.236Z",
+    "messageHash": "0xe9ec89d2067b6da8eb9acc57223ed570d8851206ceaf7a538d31b22a0f220884"
+  }
+}

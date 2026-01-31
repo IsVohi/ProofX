@@ -40,8 +40,8 @@ app.use(limiter);
 // The circuit proves: (assets - liabilities) > threshold
 // ══════════════════════════════════════════════════════════════════════════
 
-const CIRCUIT_WASM_PATH = path.resolve(__dirname, '../circuits/build/compliance_js/compliance.wasm');
-const CIRCUIT_ZKEY_PATH = path.resolve(__dirname, '../circuits/build/circuit_final.zkey');
+const CIRCUIT_WASM_PATH = path.resolve(__dirname, '../public/zk/compliance.wasm');
+const CIRCUIT_ZKEY_PATH = path.resolve(__dirname, '../public/zk/circuit_final.zkey');
 
 // Verify circuit artifacts exist on startup
 function verifyCircuitArtifacts() {
@@ -281,12 +281,24 @@ app.get('/', (req, res) => {
 app.post('/prove', async (req, res) => {
     try {
         const input = req.body;
-        console.log("📝 Received proof request:", input.institutionId, input.metric);
-        console.log("   📊 Input check - assets:", input.assets, "liabilities:", input.liabilities, "threshold:", input.threshold);
+
+        // Support different verification types
+        const VERIFICATION_TYPES = [
+            'capital_adequacy', 'gst_verification', 'bank_statement',
+            'kyc_verification', 'credit_score', 'aml_screening'
+        ];
+        const verificationType = VERIFICATION_TYPES.includes(input.metric)
+            ? input.metric
+            : 'capital_adequacy';
+
+        console.log("📝 Received proof request:");
+        console.log("   📋 Type:", verificationType.toUpperCase().replace('_', ' '));
+        console.log("   🏛️  Entity:", input.institutionId);
+        console.log("   📊 Assets:", input.assets, "| Liabilities:", input.liabilities, "| Threshold:", input.threshold);
 
         // Check if we have real circuit artifacts
         const useRealZK = verifyCircuitArtifacts();
-        console.log("   🔐 Circuit artifacts ready:", useRealZK);
+        console.log("   🔐 Mode:", useRealZK ? "REAL ZK PROOF" : "SIMULATED");
 
         if (useRealZK && input.assets && input.liabilities && input.threshold) {
             // ═══════════════════════════════════════════════════════════════

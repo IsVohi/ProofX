@@ -1,0 +1,35 @@
+{
+  "documentType": "Financial Statement",
+  "version": "1.0",
+  "institution": {
+    "name": "Horizon Exchange",
+    "id": "HORIZON-2024-001",
+    "type": "Crypto Exchange",
+    "reportingPeriod": "Q4 2024"
+  },
+  "financialData": {
+    "assets": {
+      "cash": 100000,
+      "investments": 200000,
+      "loans": 150000,
+      "property": 50000,
+      "total": 500000
+    },
+    "liabilities": {
+      "deposits": 350000,
+      "borrowings": 80000,
+      "otherLiabilities": 20000,
+      "total": 450000
+    },
+    "capital": 50000
+  },
+  "metadata": {
+    "generatedAt": "2024-12-15T12:00:00Z",
+    "auditor": "CryptoAudit LLC",
+    "signature": "0xc13c21a418c9ffbd8b7dee030474e39024d0aff47b24f04e09754a632bbd4b680593beb90914740aa9648062e8b848b13135fb567d9e0fd31ae2b811a2c543bc1c",
+    "issuerAddress": "0x1563915e194D8CfBA1943570603F7606A3115508",
+    "issuerName": "Reserve Bank of India",
+    "signedAt": "2026-01-30T22:16:11.249Z",
+    "messageHash": "0x13a05a7388b409a6d32ab6155622d32f5ee79c43e931c8677ee8e8498f6364fd"
+  }
+}

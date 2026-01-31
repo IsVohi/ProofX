@@ -1,0 +1,39 @@
+{
+  "documentType": "Bank Statement",
+  "version": "1.0",
+  "account": {
+    "holderName": "Sunrise Industries Ltd",
+    "accountNumber": "XXXX XXXX 4521",
+    "bankName": "State Bank of India",
+    "ifsc": "SBIN0001234",
+    "accountType": "Current Account",
+    "period": "January 2025"
+  },
+  "summary": {
+    "openingBalance": 2500000,
+    "totalCredits": 8500000,
+    "totalDebits": 6200000,
+    "closingBalance": 4800000,
+    "averageBalance": 3650000
+  },
+  "transactions": {
+    "creditCount": 45,
+    "debitCount": 89,
+    "largestCredit": 2000000,
+    "largestDebit": 1500000
+  },
+  "compliance": {
+    "currentBalance": 4800000,
+    "minBalance": 500000,
+    "avgMonthlyBalance": 3650000
+  },
+  "metadata": {
+    "generatedAt": "2025-01-31T09:00:00Z",
+    "source": "SBI NetBanking",
+    "signature": "0xae2e5bd76b6a9288bb302a38b667ad147bc7d12174fd68127bca3dd8a714073b0d345a954c69a267238d3452ac7f28a312b21ddb6b16beaf382926ba77c104d21c",
+    "issuerAddress": "0x5CbDd86a2FA8Dc4bDdd8a8f69dBa48572EeC07FB",
+    "issuerName": "State Bank of India",
+    "signedAt": "2026-01-30T22:16:11.256Z",
+    "messageHash": "0xa3f482664a21802d798d64c2ea2460e7d30f963a68b40d103414d93c28a171a1"
+  }
+}

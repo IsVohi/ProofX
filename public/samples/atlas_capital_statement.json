@@ -1,0 +1,35 @@
+{
+  "documentType": "Financial Statement",
+  "version": "1.0",
+  "institution": {
+    "name": "Atlas Capital",
+    "id": "ATLAS-2024-001",
+    "type": "Investment Fund",
+    "reportingPeriod": "Q4 2024"
+  },
+  "financialData": {
+    "assets": {
+      "cash": 300000,
+      "investments": 900000,
+      "loans": 200000,
+      "property": 100000,
+      "total": 1500000
+    },
+    "liabilities": {
+      "deposits": 0,
+      "borrowings": 400000,
+      "otherLiabilities": 100000,
+      "total": 500000
+    },
+    "capital": 1000000
+  },
+  "metadata": {
+    "generatedAt": "2024-12-15T11:00:00Z",
+    "auditor": "CapitalAudit Partners",
+    "signature": "0xc7eeb22c99a854b748a9d1a5b3db207b48141d34f1e3f0729b6a495d46ff43ce0a1933fb40e44bfb9219f05ce8ebf3689c17e97ab829d1a1513591eb24e685b91b",
+    "issuerAddress": "0x1563915e194D8CfBA1943570603F7606A3115508",
+    "issuerName": "Reserve Bank of India",
+    "signedAt": "2026-01-30T22:16:11.246Z",
+    "messageHash": "0xfb9f43de9e5ed4d97c1f387317d0296d1b46a9c9827a56b22c7c55c0d2e6d92e"
+  }
+}

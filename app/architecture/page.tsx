@@ -194,20 +194,21 @@ export default function ArchitecturePage() {
                             <pre className="p-6 text-sm font-mono overflow-x-auto">
                                 <code className="text-[var(--text-secondary)]">
                                     {`{
-  "version": "1.0.0",
+  "version": "1.2.0",
   "status": "operational",
-  "uptime": "99.99%",
-  "last_audit": "2025-01-15",
+  "uptime": "99.97%",
+  "chain": "sepolia",
+  "contract": "0x7f0A...",
   "security": {
     "encryption": "AES-256-GCM",
     "proof_system": "Groth16",
     "hash_function": "Poseidon",
     "curve": "BN254"
   },
-  "network": {
-    "nodes": 42,
-    "regions": ["us-east", "eu-west", "ap-south"],
-    "latency_p99": "12ms"
+  "prover": {
+    "status": "live",
+    "port": 3001,
+    "mode": "real_proofs"
   }
 }`}
                                 </code>

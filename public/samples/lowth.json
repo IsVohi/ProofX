@@ -1,0 +1,35 @@
+{
+  "documentType": "Financial Statement",
+  "version": "1.0",
+  "institution": {
+    "name": "LowCap Startup Bank",
+    "id": "LOWCAP-2024-001",
+    "type": "Digital Bank Startup",
+    "reportingPeriod": "Q4 2024"
+  },
+  "financialData": {
+    "assets": {
+      "cash": 100000,
+      "investments": 50000,
+      "loans": 40000,
+      "property": 10000,
+      "total": 200000
+    },
+    "liabilities": {
+      "deposits": 120000,
+      "borrowings": 50000,
+      "otherLiabilities": 10000,
+      "total": 180000
+    },
+    "capital": 20000
+  },
+  "metadata": {
+    "generatedAt": "2024-12-20T10:00:00Z",
+    "auditor": "QuickAudit Inc",
+    "signature": "0x3940b14ec08c23508dfc1fe29d2507a26628678ed87c3b21736566d8c7e2b3e71b38d947d1d705ed3679a38374eca7bf44d38a0e142e18998db43036b45d7d331c",
+    "issuerAddress": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A",
+    "issuerName": "Federal Reserve",
+    "signedAt": "2026-01-30T22:16:11.241Z",
+    "messageHash": "0x10819f4ad14e2d5aa76217234ce8c25ccb372f27ab394c01b6eb64c18342ec94"
+  }
+}
