@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   experimental: {
     // @ts-ignore
     outputFileTracingIncludes: {
-      '/api/prove': ['./public/zk/**/*'],
+      '/api/prove': ['./zk-artifacts/**/*'],
     },
   },
 };

@@ -98,9 +98,28 @@ export async function POST(req: NextRequest) {
         console.log("📝 API Prover: Request received", { entity: body.institutionId });
 
         // LOCATE ARTIFACTS
-        // Reliable method: process.cwd() + /public
-        const wasmPath = path.join(process.cwd(), "public/zk/compliance.wasm");
-        const zkeyPath = path.join(process.cwd(), "public/zk/circuit_final.zkey");
+        // Using root-level 'zk-artifacts' folder which is traced by Next.js config
+        const zkDir = path.join(process.cwd(), "zk-artifacts");
+        const wasmPath = path.join(zkDir, "compliance.wasm");
+        const zkeyPath = path.join(zkDir, "circuit_final.zkey");
+
+        console.log("📂 Resolving ZK paths:");
+        console.log("   CWD:", process.cwd());
+        console.log("   Target Dir:", zkDir);
+
+        // Debug: List files in CWD and Target Dir to help debugging on Vercel
+        try {
+            const cwdFiles = await fs.readdir(process.cwd());
+            console.log("   Files in CWD:", cwdFiles.join(", "));
+            if (cwdFiles.includes("zk-artifacts")) {
+                const zkFiles = await fs.readdir(zkDir);
+                console.log("   Files in zk-artifacts:", zkFiles.join(", "));
+            } else {
+                console.warn("⚠️ zk-artifacts folder NOT found in CWD");
+            }
+        } catch (err) {
+            console.error("   FS Debug Error:", err);
+        }
 
         // Check existence
         try {
@@ -108,8 +127,9 @@ export async function POST(req: NextRequest) {
             await fs.access(zkeyPath);
         } catch (e) {
             console.error("❌ ZK Artifacts missing:", e);
+            // Fallback: check if they are in public/zk just in case
             return NextResponse.json(
-                { success: false, error: "Server misconfiguration: ZK artifacts missing" },
+                { success: false, error: `Server misconfiguration: ZK artifacts missing at ${zkDir}` },
                 { status: 500 }
             );
         }
