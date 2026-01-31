@@ -12,7 +12,8 @@
     "setup": "npm install && cd prover && npm install && cd ../blockchain && npm install",
     "compile": "cd blockchain && npx hardhat compile",
     "deploy:sepolia": "cd blockchain && npx hardhat run scripts/deploy.ts --network sepolia",
-    "deploy:amoy": "cd blockchain && npx hardhat run scripts/deploy.ts --network amoy"
+    "deploy:amoy": "cd blockchain && npx hardhat run scripts/deploy.ts --network amoy",
+    "postinstall": "node scripts/bundle-zk.js"
   },
   "dependencies": {
     "concurrently": "^8.2.2",
